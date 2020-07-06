@@ -5,7 +5,6 @@ import time
 
 import aria2p
 import telegram.ext as tg
-from dotenv import load_dotenv
 import socket
 
 socket.setdefaulttimeout(600)
@@ -19,7 +18,6 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     handlers=[logging.FileHandler('log.txt'), logging.StreamHandler()],
                     level=logging.INFO)
 
-load_dotenv('config.env')
 
 Interval = []
 
@@ -30,12 +28,6 @@ def getConfig(name: str):
 
 LOGGER = logging.getLogger(__name__)
 
-try:
-    if bool(getConfig('_____REMOVE_THIS_LINE_____')):
-        logging.error('The README.md file there to be read! Exiting now!')
-        exit()
-except KeyError:
-    pass
 
 aria2 = aria2p.API(
     aria2p.Client(
@@ -57,14 +49,6 @@ status_reply_dict = {}
 # Value: An object of DownloadStatus
 download_dict = {}
 # Stores list of users and chats the bot is authorized to use in
-AUTHORIZED_CHATS = set()
-if os.path.exists('authorized_chats.txt'):
-    with open('authorized_chats.txt', 'r+') as f:
-        lines = f.readlines()
-        for line in lines:
-            #    LOGGER.info(line.split())
-            AUTHORIZED_CHATS.add(int(line.split()[0]))
-
 
 try:
     BOT_TOKEN = getConfig('BOT_TOKEN')

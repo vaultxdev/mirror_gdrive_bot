@@ -72,12 +72,13 @@ python3 generate_string_session.py
 ```
 OR
 
+
 **Termux:**
 ``` pkg install python wget ``` (if not installed earlier)
 ``` wget https://raw.githubusercontent.com/archertanu/mirror_gdrive_bot/master/generate_string_session.py ```
 ``` pip install pyrogram tgcrypto ```
 ``` python3 generate_string_session.py ```
-```
+___
 
 
 Note: You can limit maximum concurrent downloads by changing the value of MAX_CONCURRENT_DOWNLOADS in aria.sh. By default, it's set to 2
@@ -101,6 +102,7 @@ Or
 pip3 install oauth2client
 python3 generate_drive_token.py
 ```
+OR
 
 **Termux:**
 
@@ -108,7 +110,7 @@ python3 generate_drive_token.py
 ``` wget https://raw.githubusercontent.com/archertanu/mirror_gdrive_bot/master/generate_drive_token.py ```
 ``` pip install oauth2client ```
 ``` python3 generate_drive_token.py ```
-```
+___
 
 
 ## Deploying
