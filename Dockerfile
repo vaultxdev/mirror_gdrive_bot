@@ -7,8 +7,7 @@ RUN apt-get -qq install -y aria2 git python3 python3-pip \
     locales python3-lxml \
     curl pv jq ffmpeg
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt && \
-    apt-get -qq purge git
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
@@ -17,5 +16,9 @@ ENV LC_ALL en_US.UTF-8
 COPY . .
 COPY netrc /root/.netrc
 RUN chmod +x aria.sh
+RUN git clone -b master https://github.com/archertanu/mirror_gdrive_bot /root/bot
+RUN mkdir /root/bot/bin/
+WORKDIR /root/bot/
+
 
 CMD ["bash","start.sh"]

@@ -97,6 +97,12 @@ sudo docker build . -t mirror-bot
 sudo docker run mirror-bot
 ```
 
+## Deploy Heroku
+
+The easiest way to deploy this bot! is click on the image below
+
+<p align=""><a href="https://heroku.com/deploy?template=https://github.com/archertanu/mirror_gdrive_bot/tree/master"> <img src="https://camo.githubusercontent.com/83b0e95b38892b49184e07ad572c94c8038323fb/68747470733a2f2f7777772e6865726f6b7563646e2e636f6d2f6465706c6f792f627574746f6e2e737667" alt="Deploy to Heroku" /></a></p>
+
 # Using service accounts for uploading to avoid user rate limit
 For Service Account to work, you must set USE_SERVICE_ACCOUNTS="True" in config file or environment variables
 Many thanks to [AutoRClone](https://github.com/xyou365/AutoRclone) for the scripts
@@ -131,3 +137,55 @@ For using your premium accounts in youtube-dl, edit the netrc file (in the root 
 machine host login username password my_youtube_password
 ```
 where host is the name of extractor (eg. youtube, twitch). Multiple accounts of different hosts can be added each separated by a new line
+
+## Deploying on Heroku
+- Run the script to generate refresh token for Google Drive:
+```
+python3 generate_drive_token.py
+```
+- Install [Heroku cli](https://devcenter.heroku.com/articles/heroku-cli)
+- Login into your heroku account with command:
+```
+heroku login
+```
+- Create a new heroku app:
+```
+heroku create appname	
+```
+- Select This App in your Heroku-cli: 
+```
+heroku git:remote -a appname
+```
+- Change Dyno Stack to a Docker Container:
+```
+heroku stack:set container
+```
+- Add Private Credentials and Config Stuff:
+```
+git add -f credentials.json token.pickle config.env
+```
+- Commit new changes:
+```
+git commit -m "Added Creds."
+```
+- Push Code to Heroku:
+```
+git push heroku master --force
+```
+- Restart Worker by these commands:
+```
+heroku ps:scale worker=0
+```
+```
+heroku ps:scale worker=1
+```
+Heroku-Note: Doing authorizations ( /authorize command ) through telegram wont be permanent as heroku uses ephemeral filesystem. They will be reset on each dyno boot. As a workaround you can:
+- Make a file authorized_chats.txt and write the user names and chat_id of you want to authorize, each separated by new line
+- Then force add authorized_chats.txt to git and push it to heroku
+```
+git add authorized_chats.txt -f
+git commit -asm "Added hardcoded authorized_chats.txt"
+git push heroku heroku:master
+```
+
+
