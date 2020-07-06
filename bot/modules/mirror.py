@@ -6,7 +6,7 @@ from bot import dispatcher, DOWNLOAD_DIR, DOWNLOAD_STATUS_UPDATE_INTERVAL, downl
 from bot.helper.ext_utils import fs_utils, bot_utils
 from bot.helper.ext_utils.bot_utils import setInterval
 from bot.helper.ext_utils.exceptions import DirectDownloadLinkException
-from bot.helper.mirror_utils.download_utils import aria2_download
+from bot.helper.mirror_utils.download_utils.aria2_download import AriaDownloadHelper
 from bot.helper.mirror_utils.download_utils.direct_link_generator import direct_link_generator
 from bot.helper.mirror_utils.download_utils.telegram_downloader import TelegramDownloadHelper
 from bot.helper.mirror_utils.status_utils import listeners
@@ -19,6 +19,9 @@ from bot.helper.telegram_helper.message_utils import *
 from bot.helper.mirror_utils.download_utils.youtube_dl_download_helper import YoutubeDLHelper
 import pathlib
 import os
+
+ariaDlManager = AriaDownloadHelper()
+ariaDlManager.start_listener()
 
 
 class MirrorListener(listeners.MirrorListeners):
@@ -83,7 +86,6 @@ class MirrorListener(listeners.MirrorListeners):
                 del download_dict[self.uid]
                 LOGGER.info(f"Deleting folder: {download.path()}")
                 fs_utils.clean_download(download.path())
-                LOGGER.info(f"Deleting {download.name()} from download_dict.")
                 LOGGER.info(str(download_dict))
             except Exception as e:
                 LOGGER.error(str(e))
@@ -108,13 +110,13 @@ class MirrorListener(listeners.MirrorListeners):
 
     def onUploadComplete(self, link: str):
         with download_dict_lock:
-            msg = f'<b>Filename:</b> <code>{download_dict[self.uid].name()}</code>\n\n<b>Size:</b> <i>{download_dict[self.uid].size()}</i>\n\n<b>Gdrive:</b> {link}'            
+            msg = f'<a href="{link}">{download_dict[self.uid].name()}</a> ({download_dict[self.uid].size()})'
             LOGGER.info(f'Done Uploading {download_dict[self.uid].name()}')
             if INDEX_URL is not None:
                 share_url = requests.utils.requote_uri(f'{INDEX_URL}/{download_dict[self.uid].name()}')
                 if os.path.isdir(f'{DOWNLOAD_DIR}/{self.uid}/{download_dict[self.uid].name()}'):
                     share_url += '/'
-                msg += f'\n\n<b>Index:</b> {share_url}'
+                msg += f'\n\n Shareable link: <a href="{share_url}">here</a>'
             if self.tag is not None:
                 msg += f'\ncc: @{self.tag}'
             try:
@@ -186,8 +188,7 @@ def _mirror(bot, update, isTar=False):
     except DirectDownloadLinkException as e:
         LOGGER.info(f'{link}: {e}')
     listener = MirrorListener(bot, update, isTar, tag)
-    aria = aria2_download.AriaDownloadHelper(listener)
-    aria.add_download(link, f'{DOWNLOAD_DIR}/{listener.uid}/')
+    ariaDlManager.add_download(link, f'{DOWNLOAD_DIR}/{listener.uid}/',listener)
     sendStatusMessage(update, bot)
     if len(Interval) == 0:
         Interval.append(setInterval(DOWNLOAD_STATUS_UPDATE_INTERVAL, update_all_messages))
